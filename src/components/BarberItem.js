@@ -33,7 +33,7 @@ const SeeProfile = styled.View`
   width: 92px;
   height: 28px;
   border-radius: 10px;
-  background-color: #7159c1;
+  background-color: salmon;
   justify-content: center;
   align-items: center;
 `;

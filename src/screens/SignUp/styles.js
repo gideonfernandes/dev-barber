@@ -14,7 +14,7 @@ export const FormArea = styled.View`
 
 export const CustomButton = styled.TouchableOpacity`
   height: 60px;
-  background-color: #7159c1;
+  background-color: salmon;
   border-radius: 30px;
   justify-content: center;
   align-items: center;

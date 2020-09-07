@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Platform} from 'react-native';
+import {Platform, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
@@ -28,9 +28,11 @@ const Home = () => {
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
   const [barbers, setBarbers] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     getBarbers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const navigation = useNavigation();
@@ -50,10 +52,20 @@ const Home = () => {
 
       setLocationText('');
       setBarbers([]);
-      Geolocation.getCurrentPosition((info) => {
-        setCoords(info.coords);
-        getBarbers();
-      });
+      Geolocation.getCurrentPosition(
+        (info) => {
+          setCoords(info.coords);
+          getBarbers();
+        },
+        (error) => {
+          console.log(error);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 2000,
+          maximumAge: 3600000,
+        },
+      );
     }
   };
 
@@ -61,7 +73,16 @@ const Home = () => {
     setLoading(true);
 
     setBarbers([]);
-    const response = await Api.getBarbers();
+
+    let lat = null;
+    let lng = null;
+
+    if (coords) {
+      lat = coords.latitude;
+      lng = coords.longitude;
+    }
+
+    const response = await Api.getBarbers(lat, lng, locationText);
     if (response.error === '') {
       if (response.loc) {
         setLocationText(response.loc);
@@ -76,16 +97,29 @@ const Home = () => {
     setLoading(false);
   };
 
+  const handleOnRefresh = () => {
+    setRefreshing(false);
+    getBarbers();
+  };
+
+  const handleLocationSearch = () => {
+    setCoords({});
+    getBarbers();
+  };
+
   return (
     <Container>
-      <Scroller>
+      <Scroller
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleOnRefresh} />
+        }>
         <HeaderArea>
           <HeaderTitle numberOfLines={2}>
             Encontre o seu barbeiro favorito
           </HeaderTitle>
 
           <SearchButton onPress={() => navigation.navigate('Search')}>
-            <SearchIcon width="26" height="26" fill="#7159c1" />
+            <SearchIcon width="26" height="26" fill="salmon" />
           </SearchButton>
         </HeaderArea>
 
@@ -95,6 +129,7 @@ const Home = () => {
             placeholderTextColor="#ccc"
             value={locationText}
             onChangeText={(text) => setLocationText(text)}
+            onEndEditing={handleLocationSearch}
           />
 
           <LocationFinder onPress={handleLocationFinder}>
