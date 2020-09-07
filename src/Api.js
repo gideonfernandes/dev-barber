@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-community/async-storage';
 const baseAPI = 'https://api.b7web.com.br/devbarber/api';
 
 export default {
@@ -39,6 +40,13 @@ export default {
       body: JSON.stringify({name, email, password}),
     });
 
+    const response = await request.json();
+    return response;
+  },
+
+  getBarbers: async () => {
+    const token = await AsyncStorage.getItem('token');
+    const request = await fetch(`${baseAPI}/barbers?token=${token}`);
     const response = await request.json();
     return response;
   },
