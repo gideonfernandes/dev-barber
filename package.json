@@ -25,7 +25,8 @@
     "react-native-screens": "^2.10.1",
     "react-native-svg": "^12.1.0",
     "react-native-svg-transformer": "^0.14.3",
-    "react-native-swiper": "^1.6.0"
+    "react-native-swiper": "^1.6.0",
+    "styled-components": "^5.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
