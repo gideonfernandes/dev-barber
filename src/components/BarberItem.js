@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/native';
+import {useNavigation} from '@react-navigation/native';
 
 import Stars from '../components/Stars';
 
@@ -44,9 +45,21 @@ const SeeProfileText = styled.Text`
 `;
 
 const BarberItem = ({barberData}) => {
-  const {avatar, name, stars} = barberData;
+  const {id, avatar, name, stars} = barberData;
+
+  const navigation = useNavigation();
+
+  const handleClick = () => {
+    navigation.navigate('Barber', {
+      id,
+      avatar,
+      name,
+      stars,
+    });
+  };
+
   return (
-    <Card>
+    <Card onPress={handleClick}>
       <Avatar source={{uri: avatar}} />
       <Infos>
         <UserName>{name}</UserName>

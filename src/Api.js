@@ -44,12 +44,37 @@ export default {
     return response;
   },
 
+  logout: async () => {
+    const token = await AsyncStorage.getItem('token');
+
+    const request = await fetch(`${baseAPI}/auth/logout`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({token}),
+    });
+
+    const response = await request.json();
+    return response;
+  },
+
   getBarbers: async (lat = null, lng = null, address = '') => {
     const token = await AsyncStorage.getItem('token');
     const request = await fetch(
       `${baseAPI}/barbers?token=${token}&lat=${lat}&lng=${lng}&address=${address}`,
     );
     const response = await request.json();
+    return response;
+  },
+
+  getBarber: async (id) => {
+    const token = await AsyncStorage.getItem('token');
+
+    const request = await fetch(`${baseAPI}/barber/${id}?token=${token}`);
+    const response = await request.json();
+
     return response;
   },
 };
