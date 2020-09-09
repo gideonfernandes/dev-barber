@@ -3,8 +3,11 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
 
 import Stars from '../../components/Stars';
+import FavoriteFullIcon from '../../assets/favorite_full.svg';
 import FavoriteIcon from '../../assets/favorite.svg';
 import BackIcon from '../../assets/back.svg';
+import NavPrevIcon from '../../assets/nav_prev.svg';
+import NavNextIcon from '../../assets/nav_next.svg';
 
 import {
   Container,
@@ -29,6 +32,10 @@ import {
   ChooseServiceButton,
   ChooseServiceButtonText,
   TestimonialArea,
+  TestimonialItem,
+  TestimonialInfo,
+  TestimonialName,
+  TestimonialBody,
   BackButton,
 } from './styles';
 
@@ -40,6 +47,7 @@ const Barber = () => {
 
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState({});
+  const [favorited, setFavorited] = useState(false);
 
   useEffect(() => {
     const getBarberInfo = async () => {
@@ -49,6 +57,7 @@ const Barber = () => {
 
       if (response.error === '') {
         setUserInfo(response.data);
+        setFavorited(response.data.favorited);
       } else {
         // eslint-disable-next-line no-alert
         alert(`Error: ${response.error}`);
@@ -60,6 +69,12 @@ const Barber = () => {
     getBarberInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleFavButton = () => {
+    setFavorited(!favorited);
+  };
+
+  const handleChooseService = (index) => {};
 
   const handleBackButton = () => {
     navigation.goBack();
@@ -94,8 +109,12 @@ const Barber = () => {
               <Stars stars={userInfo.stars} showNumber />
             </UserInfo>
 
-            <UserFavButton>
-              <FavoriteIcon width="24" height="24" fill="#ff0000" />
+            <UserFavButton onPress={handleFavButton}>
+              {favorited ? (
+                <FavoriteFullIcon width="24" height="24" fill="#ff0000" />
+              ) : (
+                <FavoriteIcon width="24" height="24" fill="#ff0000" />
+              )}
             </UserFavButton>
           </UserInfoArea>
 
@@ -110,7 +129,8 @@ const Barber = () => {
                     <ServiceName>{service.name}</ServiceName>
                     <ServicePrice>R$ {service.price}</ServicePrice>
                   </ServiceInfo>
-                  <ChooseServiceButton>
+                  <ChooseServiceButton
+                    onPress={() => handleChooseService(index)}>
                     <ChooseServiceButtonText />
                   </ChooseServiceButton>
                 </ServiceItem>
@@ -118,11 +138,30 @@ const Barber = () => {
             </ServiceArea>
           )}
 
-          {userInfo.testimonials && <TestimonialArea />}
+          {userInfo.testimonials && userInfo.testimonials.length > 0 && (
+            <TestimonialArea>
+              <Swiper
+                style={{height: 110}}
+                showsPagination={false}
+                showsButtons
+                prevButton={<NavPrevIcon width="35" height="35" fill="#ccc" />}
+                nextButton={<NavNextIcon width="35" height="35" fill="#ccc" />}>
+                {userInfo.testimonials.map((testimonial, index) => (
+                  <TestimonialItem key={index}>
+                    <TestimonialInfo>
+                      <TestimonialName>{testimonial.name}</TestimonialName>
+                      <Stars stars={testimonial.rate} showNumber={false} />
+                    </TestimonialInfo>
+                    <TestimonialBody>{testimonial.body}</TestimonialBody>
+                  </TestimonialItem>
+                ))}
+              </Swiper>
+            </TestimonialArea>
+          )}
         </PageBody>
       </Scroller>
       <BackButton onPress={handleBackButton}>
-        <BackIcon width="44" height="44" fill="fff" />
+        <BackIcon width="44" height="44" fill="#fff" />
       </BackButton>
     </Container>
   );
