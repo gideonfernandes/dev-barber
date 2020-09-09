@@ -2,6 +2,10 @@ import React, {useState, useEffect} from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
 
+import Stars from '../../components/Stars';
+import FavoriteIcon from '../../assets/favorite.svg';
+import BackIcon from '../../assets/back.svg';
+
 import {
   Container,
   Scroller,
@@ -11,8 +15,21 @@ import {
   FakeSwiper,
   PageBody,
   UserInfoArea,
+  UserAvatar,
+  UserInfo,
+  UserName,
+  UserFavButton,
+  LoadingIcon,
   ServiceArea,
+  ServicesTitle,
+  ServiceItem,
+  ServiceInfo,
+  ServiceName,
+  ServicePrice,
+  ChooseServiceButton,
+  ChooseServiceButtonText,
   TestimonialArea,
+  BackButton,
 } from './styles';
 
 import Api from '../../Api';
@@ -44,6 +61,10 @@ const Barber = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleBackButton = () => {
+    navigation.goBack();
+  };
+
   return (
     <Container>
       <Scroller>
@@ -65,11 +86,44 @@ const Barber = () => {
           <FakeSwiper />
         )}
         <PageBody>
-          <UserInfoArea />
-          <ServiceArea />
-          <TestimonialArea />
+          <UserInfoArea>
+            <UserAvatar source={{uri: userInfo.avatar}} />
+
+            <UserInfo>
+              <UserName>{userInfo.name}</UserName>
+              <Stars stars={userInfo.stars} showNumber />
+            </UserInfo>
+
+            <UserFavButton>
+              <FavoriteIcon width="24" height="24" fill="#ff0000" />
+            </UserFavButton>
+          </UserInfoArea>
+
+          {loading && <LoadingIcon size="large" color="#333" />}
+
+          {userInfo.services && (
+            <ServiceArea>
+              <ServicesTitle>Lista de Serviços</ServicesTitle>
+              {userInfo.services.map((service, index) => (
+                <ServiceItem key={index}>
+                  <ServiceInfo>
+                    <ServiceName>{service.name}</ServiceName>
+                    <ServicePrice>R$ {service.price}</ServicePrice>
+                  </ServiceInfo>
+                  <ChooseServiceButton>
+                    <ChooseServiceButtonText />
+                  </ChooseServiceButton>
+                </ServiceItem>
+              ))}
+            </ServiceArea>
+          )}
+
+          {userInfo.testimonials && <TestimonialArea />}
         </PageBody>
       </Scroller>
+      <BackButton onPress={handleBackButton}>
+        <BackIcon width="44" height="44" fill="fff" />
+      </BackButton>
     </Container>
   );
 };
