@@ -3,6 +3,8 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
 
 import Stars from '../../components/Stars';
+import AppointmentModal from '../../components/AppointmentModal';
+
 import FavoriteFullIcon from '../../assets/favorite_full.svg';
 import FavoriteIcon from '../../assets/favorite.svg';
 import BackIcon from '../../assets/back.svg';
@@ -48,6 +50,8 @@ const Barber = () => {
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState({});
   const [favorited, setFavorited] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const getBarberInfo = async () => {
@@ -74,7 +78,10 @@ const Barber = () => {
     setFavorited(!favorited);
   };
 
-  const handleChooseService = (index) => {};
+  const handleChooseService = (index) => {
+    setSelectedService(index);
+    setShowModal(true);
+  };
 
   const handleBackButton = () => {
     navigation.goBack();
@@ -127,11 +134,11 @@ const Barber = () => {
                 <ServiceItem key={index}>
                   <ServiceInfo>
                     <ServiceName>{service.name}</ServiceName>
-                    <ServicePrice>R$ {service.price}</ServicePrice>
+                    <ServicePrice>R$ {service.price.toFixed(2)}</ServicePrice>
                   </ServiceInfo>
                   <ChooseServiceButton
                     onPress={() => handleChooseService(index)}>
-                    <ChooseServiceButtonText />
+                    <ChooseServiceButtonText>Agendar</ChooseServiceButtonText>
                   </ChooseServiceButton>
                 </ServiceItem>
               ))}
@@ -163,6 +170,13 @@ const Barber = () => {
       <BackButton onPress={handleBackButton}>
         <BackIcon width="44" height="44" fill="#fff" />
       </BackButton>
+
+      <AppointmentModal
+        show={showModal}
+        setShow={setShowModal}
+        user={userInfo}
+        service={selectedService}
+      />
     </Container>
   );
 };
