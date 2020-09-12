@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import styled from 'styled-components/native';
 import {useNavigation} from '@react-navigation/native';
 
+import Api from '../Api';
+
 import ExpandIcon from '../assets/expand.svg';
 import NavPrevIcon from '../assets/nav_prev.svg';
 import NavNextIcon from '../assets/nav_next.svg';
@@ -107,18 +109,38 @@ const DateItem = styled.TouchableOpacity`
   border-radius: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
-  opacity: ${(props) => (props.available ? '0.3' : 1)};
+  margin: 8px 0;
+  opacity: ${(props) => (props.available ? 1 : '0.3')};
+  background-color: ${(props) => (props.selected ? 'salmon' : '#fff')};
 `;
 
 const DateItemWeekDay = styled.Text`
   font-size: 16px;
   font-weight: bold;
-  color: #333;
+  color: ${(props) => (props.selected ? '#fff' : '#555')};
 `;
 
 const DateItemNumber = styled.Text`
   font-size: 16px;
   font-weight: bold;
+  color: ${(props) => (props.selected ? '#fff' : '#555')};
+`;
+
+const TimeList = styled.ScrollView``;
+
+const TimeItem = styled.TouchableOpacity`
+  width: 75px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  background-color: ${(props) => (props.selected ? 'salmon' : '#fff')};
+`;
+
+const TimeItemText = styled.Text`
+  font-size: 16px;
+  font-weight: bold;
+  color: ${(props) => (props.selected ? '#fff' : '#555')};
 `;
 
 const FinishButton = styled.TouchableOpacity`
@@ -127,6 +149,7 @@ const FinishButton = styled.TouchableOpacity`
   border-radius: 10px;
   justify-content: center;
   align-items: center;
+  margin-top: 16px;
 `;
 
 const FinishButtonText = styled.Text`
@@ -192,11 +215,32 @@ const AppointmentModal = ({show, setShow, user, service}) => {
       }
 
       setListDays(newListDays);
-      setSelectedDay(1);
+      setSelectedDay(0);
       setListHours([]);
       setSelectedHour(0);
     }
   }, [user, selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    if (user.available && selectedDay > 0) {
+      let d = new Date(selectedYear, selectedMonth, selectedDay);
+      let year = d.getFullYear();
+      let month = d.getMonth() + 1;
+      let day = d.getDate();
+
+      month = month < 10 ? '0' + month : month;
+      day = day < 10 ? '0' + day : day;
+      let selDate = `${year}-${month}-${day}`;
+
+      let availability = user.available.filter((e) => e.date === selDate);
+
+      if (availability.length > 0) {
+        setListHours(availability[0].hours);
+      }
+    }
+
+    setSelectedHour(null);
+  }, [user, selectedDay]);
 
   const navigation = useNavigation();
 
@@ -216,10 +260,40 @@ const AppointmentModal = ({show, setShow, user, service}) => {
 
     setSelectedYear(mountDate.getFullYear());
     setSelectedMonth(mountDate.getMonth());
-    setSelectedDay(1);
+    setSelectedDay(0);
   };
 
-  const handleFinishButton = () => {};
+  const handleFinishButton = async () => {
+    if (
+      user.id &&
+      service !== null &&
+      selectedYear > 0 &&
+      selectedMonth > 0 &&
+      selectedDay > 0 &&
+      selectedHour !== null
+    ) {
+      /*let response = await Api.setAppointment(
+        user.id,
+        service,
+        selectedYear,
+        selectedMonth,
+        selectedDay,
+        selectedHour,
+      );
+
+      if (response.error === '') {
+        setShow(false);
+        navigation.navigate('Appointments');
+      } else {
+        alert(`Error: ${response.error}`);
+      }*/
+      alert('Agendamento realizado com sucesso!');
+      setShow(false);
+      navigation.navigate('Home');
+    } else {
+      alert('Preencha todos os dados');
+    }
+  };
 
   return (
     <Modal transparent visible={show} animationType="slide">
@@ -269,14 +343,41 @@ const AppointmentModal = ({show, setShow, user, service}) => {
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}>
                 {listDays.map((day, key) => (
-                  <DateItem key={key} available={day.status} onPress={() => {}}>
-                    <DateItemWeekDay>{day.weekDay}</DateItemWeekDay>
-                    <DateItemNumber>{day.number}</DateItemNumber>
+                  <DateItem
+                    key={key}
+                    available={day.status}
+                    selected={selectedDay === day.number}
+                    onPress={() =>
+                      day.status ? setSelectedDay(day.number) : null
+                    }>
+                    <DateItemWeekDay selected={selectedDay === day.number}>
+                      {day.weekDay}
+                    </DateItemWeekDay>
+                    <DateItemNumber selected={selectedDay === day.number}>
+                      {day.number}
+                    </DateItemNumber>
                   </DateItem>
                 ))}
               </DateList>
             )}
           </ModalItem>
+
+          {selectedDay > 0 && listHours.length > 0 && (
+            <ModalItem>
+              <TimeList horizontal showsHorizontalScrollIndicator={false}>
+                {listHours.map((hour, index) => (
+                  <TimeItem
+                    key={index}
+                    onPress={() => setSelectedHour(hour)}
+                    selected={selectedHour === hour}>
+                    <TimeItemText selected={selectedHour === hour}>
+                      {hour}
+                    </TimeItemText>
+                  </TimeItem>
+                ))}
+              </TimeList>
+            </ModalItem>
+          )}
 
           <FinishButton onPress={handleFinishButton}>
             <FinishButtonText>Finalizar Agendamento</FinishButtonText>

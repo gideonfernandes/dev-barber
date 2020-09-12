@@ -77,4 +77,32 @@ export default {
 
     return response;
   },
+
+  setAppointment: async (
+    userId,
+    service,
+    selectedYear,
+    selectedMonth,
+    selectedDay,
+    selectedHour,
+  ) => {
+    const token = await AsyncStorage.getItem('token');
+
+    const request = await fetch(`${baseAPI}/user/appointment`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token,
+        id: userId,
+        service,
+        year: selectedYear,
+        month: selectedMonth,
+        day: selectedDay,
+        hour: selectedHour,
+      }),
+    });
+  },
 };
