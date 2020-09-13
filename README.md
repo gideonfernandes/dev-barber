@@ -18,7 +18,7 @@ This project was developed with the following technologies:
 ***
 
 ## Preview
-![preview](preview.png)
+![preview](preview.gif)
 ***
 
 ### How To Install
